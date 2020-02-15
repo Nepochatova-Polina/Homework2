@@ -1,0 +1,30 @@
+#include <iostream>
+#include "ostream"
+#include "string"
+#include <bits/stdc++.h>
+#include <sys/stat.h>
+
+using namespace std;
+
+int main() {
+    setlocale(LC_ALL, "ukr");
+
+    if (mkdir("Dictionary", 0777) == -1)
+        cerr << "Error :  " << strerror(errno) << endl;
+    else
+        cout << "Directory created";
+
+    string english, meaning;
+    cout << "Write english word" << endl;
+    cin >> english;
+    cout << "Enter meaning of this word" << endl;
+    cin.ignore();
+    getline(cin, meaning);
+
+    ofstream f(("Dictionary/" + english + ".txt").c_str());
+    f << meaning;
+    f.close();
+    return 0;
+}
+
+
