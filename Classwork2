@@ -1,0 +1,183 @@
+#include <iostream>
+#include "fstream"
+#include "ostream"
+#include "cstring"
+#include <vector>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+
+using namespace std;
+struct Word {
+    string name;
+    string meaning;
+};
+
+
+class Menu {
+    struct MenuItem {
+        string title;
+
+        void (*proc)();
+
+        MenuItem(string aTitle, void (*procLink)()) {
+            title = aTitle;
+            proc = procLink;
+        }
+    };
+
+    string menuTitle;
+    vector<MenuItem> menuItems;
+
+
+    void GetMenuView();
+
+public:
+
+    // Constructors
+    Menu() {
+        menuTitle = "Main menu";
+    }
+
+    Menu(string menuTitle) {
+        this->menuTitle = menuTitle;
+    }
+
+    // Interface methods
+    void AddMenuItem(string itemTitle, void (*procLink)());
+
+    void ShowMenu();
+};
+
+
+void Menu::GetMenuView() {
+    std::system("clear");
+
+    for (unsigned int i = 0; i < menuTitle.size() + 10; i++)
+        cout << "=";
+    cout << endl;
+    cout << menuTitle << endl;
+    for (unsigned int i = 0; i < menuTitle.size() + 10; i++)
+        cout << "=";
+    cout << endl;
+
+    int ItemNumber = 1;
+    for (vector<MenuItem>::iterator it = menuItems.begin(); it != menuItems.end(); it++, ItemNumber++) {
+        cout << ItemNumber << " ->) " << it->title << endl;
+    }
+    cout << endl << "Type \"q\" for Exit " << endl;
+
+    cout << endl;
+    cout << endl;
+
+    cout << "Type item num..." << endl;
+}
+
+void Menu::AddMenuItem(string itemTitle, void (*procLink)()) {
+    menuItems.push_back(*(new MenuItem(itemTitle, procLink)));
+}
+
+void Menu::ShowMenu() {
+    bool errorCode = false;
+    int itemN = 0;
+    char choice[255];
+    do {
+        GetMenuView();
+
+        if (errorCode) {
+            cout << "[ERROR] Wrong input!" << endl;
+            errorCode = false;
+        }
+
+        cin >> choice;
+        itemN = atoi(choice);
+
+        if (itemN > 0 && itemN <= (int) menuItems.size()) {
+            std::system("clear");
+            menuItems[itemN - 1].proc();
+        } else
+            errorCode = true;
+    } while (strcmp(choice, "q"));
+    std::system("clear");
+}
+
+
+void Create() {
+    string name;
+    setlocale(LC_ALL, "ukr");
+
+    if (mkdir("Dictionary", 0777) == -1)
+        cerr << "Error :  " << strerror(errno) << endl;
+    else
+        cout << "Directory created";
+    Word newWord;
+    cout << "Write english word" << endl;
+    cin >> newWord.name;
+    cout << "Enter meaning of this word" << endl;
+    cin.ignore();
+    getline(cin, newWord.meaning);
+
+    ofstream f(("Dictionary/" + newWord.name + ".data").c_str(), ios::binary | ios::out);
+    f.write((char *) &newWord, sizeof(newWord));
+    f.close();
+
+}
+
+void Read() {
+    string file;
+    cout << "Enter name of file which you want to see" << endl;
+    cin.ignore();
+    getline(cin, file);
+    ifstream f(("Dictionary/" + file + ".data").c_str(), ios::binary | ios::out);
+    Word newWord;
+    f.read((char *) &newWord, sizeof(newWord));
+    cout << "Word " << newWord.name << endl;
+    cout << " Meaning " << newWord.meaning << endl;
+    cout << endl;
+
+    f.close();
+}
+
+void Update() {
+    string file;
+    cout << "Enter name of file which you want to delete" << endl;
+    cin.ignore();
+    getline(cin, file);
+    fstream f(("Dictionary/" + file + ".data").c_str(), ios::binary | fstream::in | fstream:: out);
+    Word newWord;
+    f.read((char *) &newWord, sizeof(newWord));
+    cout << "Enter new meaning of the word" << endl;
+    cin.ignore();
+    getline(cin, newWord.meaning);
+    f.write((char *) &newWord, sizeof(newWord));
+    f.close();
+}
+
+void Delete() {
+    string file;
+    cout << "Enter name of file which you want to delete" << endl;
+    cin.ignore();
+    getline(cin, file);
+    fstream f(("Dictionary/" + file + ".data").c_str(), ios::binary | fstream::in | fstream::out);
+    Word newWord;
+    f.read((char *) &newWord, sizeof(newWord));
+    string str = nullptr;
+    f.write((char *) &str, str.size());
+    f.close();
+}
+
+int main() {
+    Menu someMenu("Main menu");
+
+    someMenu.AddMenuItem("Create", Create);
+    someMenu.AddMenuItem("Read", Read);
+    someMenu.AddMenuItem("Update", Update);
+    someMenu.AddMenuItem("Delete", Delete);
+
+    someMenu.ShowMenu();
+
+    return 0;
+}
+
+
+
