@@ -1,0 +1,186 @@
+#include <iostream>
+#include "ostream"
+#include <list>
+#include "algorithm"
+#include "string"
+#include <utility>
+#include <vector>
+#include <cstring>
+
+
+using namespace std;
+struct Bus {
+    int number;
+    string nameOfDriver;
+    string numberOfRoute;
+};
+
+list<Bus> busPark;
+list<Bus> busOnRoute;
+
+class Menu {
+    struct MenuItem {
+        string title;
+
+        void (*proc)();
+
+        MenuItem(string aTitle, void (*procLink)()) {
+            title = std::move(aTitle);
+            proc = procLink;
+        }
+    };
+
+    string menuTitle;
+    vector<MenuItem> menuItems;
+
+
+    void GetMenuView();
+
+public:
+
+    // Constructors
+    Menu() {
+        menuTitle = "Main menu";
+    }
+
+    explicit Menu(string menuTitle) {
+        this->menuTitle = std::move(menuTitle);
+    }
+
+    // Interface methods
+    void AddMenuItem(string itemTitle, void (*procLink)());
+
+    void ShowMenu();
+};
+
+
+void Menu::GetMenuView() {
+    std::system("clear");
+
+    for (unsigned int i = 0; i < menuTitle.size() + 10; i++)
+        cout << "=";
+    cout << endl;
+    cout << menuTitle << endl;
+    for (unsigned int i = 0; i < menuTitle.size() + 10; i++)
+        cout << "=";
+    cout << endl;
+
+    int ItemNumber = 1;
+    for (auto it = menuItems.begin(); it != menuItems.end(); it++, ItemNumber++) {
+        cout << ItemNumber << " ->) " << it->title << endl;
+    }
+    cout << endl << "Type \"0\" for Exit " << endl;
+
+    cout << endl;
+    cout << endl;
+
+    cout << "Type item num..." << endl;
+}
+
+void Menu::AddMenuItem(string itemTitle, void (*procLink)()) {
+    menuItems.push_back(*(new MenuItem(std::move(itemTitle), procLink)));
+}
+
+void Menu::ShowMenu() {
+    bool errorCode = false;
+    int itemN = 0;
+    char choice[255];
+    do {
+        GetMenuView();
+
+        if (errorCode) {
+            cout << "[ERROR] Wrong input!" << endl;
+            errorCode = false;
+        }
+
+        cin >> choice;
+        itemN = atoi(choice);
+
+        if (itemN > 0 && itemN <= (int) menuItems.size()) {
+            std::system("clear");
+            menuItems[itemN - 1].proc();
+        } else
+            errorCode = true;
+    } while (strcmp(choice, "O") != 0);
+    std::system("clear");
+}
+
+void writeNewBus() {
+    Bus newBus;
+    cout << "Enter number of bus" << endl;
+    cin >> newBus.number;
+    cout << "Enter driver's name and surname" << endl;
+    cin.ignore();
+    getline(cin, newBus.nameOfDriver);
+    cout << "Enter number of route" << endl;
+    cin >> newBus.numberOfRoute;
+    busPark.push_back(newBus);
+
+}
+
+void takeTheBusToTheRoute() {
+    Bus newBus;
+    int busNumber;
+    cout << "Enter number of bus" << endl;
+    cin >> busNumber;
+    _List_iterator<Bus> iter = find_if(busPark.begin(), busPark.end(),[] (const Bus& busNumber){});
+    if (iter != busPark.end()) {
+        newBus.number = iter->number;
+        newBus.nameOfDriver = iter->nameOfDriver;
+        newBus.numberOfRoute = iter->numberOfRoute;
+        busOnRoute.push_back(newBus);
+        busPark.erase(iter);
+        cout << "Bus are in the route" << endl;
+    }else{
+        cout << "Element not found" << endl;
+    }
+}
+
+
+void displayBusInformation() {
+    int busNumber;
+    cout << "Enter number of bus" << endl;
+    cin >> busNumber;
+    _List_iterator<Bus> iter = find_if(busPark.begin(), busPark.end(),[] (const Bus& busNumber){});
+    if (iter != busPark.end()) {
+        cout << "Number of bus:" << iter->number;
+        cout << "Driver's name:" << iter->nameOfDriver;
+        cout << "Number of route:" << iter->numberOfRoute;
+    }else{
+        cout << "Element not found" << endl;
+    }
+}
+
+
+void returnTheBusFromTheRoute() {
+    Bus newBus;
+    int busNumber;
+    cout << "Enter number of bus" << endl;
+    cin >> busNumber;
+    _List_iterator<Bus> iter = find_if(busOnRoute.begin(), busOnRoute.end(), [] (const Bus& busNumber){});
+    if (iter != busOnRoute.end()) {
+        newBus.number = iter->number;
+        newBus.nameOfDriver = iter->nameOfDriver;
+        newBus.numberOfRoute = iter->numberOfRoute;
+        busPark.push_back(newBus);
+        busOnRoute.erase(iter);
+        cout << "Bus are in the park" << endl;
+    }else{
+        cout << "Element not found" << endl;
+    }
+}
+
+int main() {
+    Menu someMenu("Main menu");
+
+    someMenu.AddMenuItem("Write new bus in the list", writeNewBus);
+    someMenu.AddMenuItem("Take the bus to the route", takeTheBusToTheRoute);
+    someMenu.AddMenuItem("Display bus information", displayBusInformation);
+    someMenu.AddMenuItem("Return the bus from the route", returnTheBusFromTheRoute);
+
+
+    someMenu.ShowMenu();
+
+    return 0;
+}
+
