@@ -1,0 +1,41 @@
+#include <iostream>
+#include "queue"
+#include "list"
+#include "stack"
+#include "string"
+
+using namespace std;
+
+int main() {
+
+    queue<string> Queue;
+    list<string> mylist;
+    int wag;
+    stack<int> passStack;
+    stack<int> cargoStack;
+    stack<int> trainStack;
+    for (int i = 0; i < 20; i++) {
+        wag = rand() % 2;
+        trainStack.push(wag);
+    }
+    while (!trainStack.empty()) {
+        if (trainStack.top() == 0) {
+            trainStack.pop();
+            cargoStack.push(trainStack.top());
+        } else {
+            trainStack.pop();
+            passStack.push(trainStack.top());
+        }
+    }
+    cout << "Passanger train:";
+    while (!passStack.empty()) {
+        cout << passStack.top();
+        passStack.pop();
+    }
+    cout << "Cargo train:";
+    while (!cargoStack.empty()) {
+        cout << cargoStack.top();
+        cargoStack.pop();
+    }
+    return 0;
+}
