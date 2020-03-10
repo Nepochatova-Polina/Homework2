@@ -1,0 +1,64 @@
+#include <iostream>
+#include "cstring"
+using namespace std;
+
+struct Tree {
+    string data;
+    Tree *left{};
+    Tree *right{};
+};
+Tree *tree = nullptr;
+
+void push(const string &word, Tree **t);
+
+void print(Tree *t, int u);
+
+Tree* Search(Tree* Tree, const string& key);
+
+int main() {
+    string word, key;
+    cout << "Enter your word" << endl;
+    cin.ignore();
+    getline(cin, word);
+    push(word, &tree);
+    print(tree, 0);
+    cout << "Enter word to find" << endl;
+    cin.ignore();
+    getline(cin, key);
+    return 0;
+}
+
+void push(const string &word, Tree **t) {
+    if ((*t) == nullptr) {
+        (*t) = new Tree;
+        (*t)->data = word;
+        (*t)->left = (*t)->right = nullptr;
+        return;
+    }
+    if (strcmp(word.c_str(), (*t)->data.c_str()) > 0) {
+        push(word, &(*t)->right);
+    } else push(word, &(*t)->left);
+}
+
+void print(Tree *t, int u) {
+    if (t == nullptr) return;
+    else
+    {
+        print(t->left, ++u);
+        for (int i = 0; i < u; ++i)
+            cout << "|";
+        cout << t->data << endl;
+        u--;
+    }
+    print(t->right, ++u);
+}
+Tree* Search(Tree* Tree, const string& key) {
+    if (Tree == nullptr)
+        return nullptr;
+    if  (Tree->data == key)
+        return Tree;
+    if (key < Tree->data)
+        return Search(Tree->left, key);
+    else
+        return Search(Tree->right, key);
+}
